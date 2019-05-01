@@ -25,7 +25,7 @@ app.use(checkAuthorization);
 
 //Handle authentication
 
-
+//main route
 app.get('/movie', (req, res, next)=>{
   let err = {}
   let results =[]
@@ -35,6 +35,7 @@ app.get('/movie', (req, res, next)=>{
     return next(err);
   }
   
+    //filter by genre or throw error
   if (genre){
     if(!genres.includes(genre.toLowerCase())){
       err.status = 400;
@@ -45,7 +46,7 @@ app.get('/movie', (req, res, next)=>{
       movie.genre.toLowerCase().includes(genre.toLowerCase())
     )
   }
-
+  //filter by country or throw error
   if (country){
     if(!countries.includes(country)){
       err.status = 400;
@@ -60,7 +61,7 @@ app.get('/movie', (req, res, next)=>{
     )
   }
   
-  
+  //filter by rating or throw error
   if (avg_vote){
     const rating = Number(avg_vote);
     if(rating < 0 || rating > 10){
@@ -71,13 +72,16 @@ app.get('/movie', (req, res, next)=>{
     }
     results = results.length > 0 ? results.filter(movie => movie.avg_vote >= rating) : MOVIES.filter(movie => movie.avg_vote >= rating)
   }
+  //reduce server output to be manageable
   if (results.length > 50) results.length = 50
     results = [{count: results.length}, ...results]
   
+
+    //send the final response
   return res.status(200).json(results)
 });
 
-
+//if not route matched
 app.use( (req, res, next) => {
   const err = {
     status: 404,
@@ -86,13 +90,17 @@ app.use( (req, res, next) => {
   next(err);
 });
 
+//error handler catch all
 app.use((err, req, res, next) => {
   res.status(err.status).json(err.message);
 });
 
+
+//start listening
 app.listen(PORT, console.log('The Portal has opened. Welcome!'));
 
 
+//Check user token
 function checkAuthorization(req, res, next){
   const userToken = req.get('Authorization');
   if (!userToken || userToken.split(' ')[1] !== process.env.API_KEY){
