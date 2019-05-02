@@ -25,8 +25,14 @@ app.use(checkAuthorization);
 
 //Handle authentication
 
+
+//Handle right parameters
+app.use(checkQuery)
+
+
 //main route
 app.get('/movie', (req, res, next)=>{
+
   let err = {};
   let results =[];
   let { genre, country, avg_vote } = req.query;
@@ -34,6 +40,10 @@ app.get('/movie', (req, res, next)=>{
     let err = {status: 413, message: 'Your request is too large. Please filter'};
     return next(err);
   }
+
+
+
+  
   
   //filter by genre or throw error
   if (genre){
@@ -64,8 +74,8 @@ app.get('/movie', (req, res, next)=>{
   //filter by rating or throw error
   if (avg_vote){
     const rating = Number(avg_vote);
-    if(rating < 0 || rating > 10){
-      console.log('sasasas');
+    if(rating < 0 || rating > 10 || isNaN(rating)){
+
       err.status = 400;
       err.message = 'Bad request: Check rating value';
       return next(err);
@@ -92,24 +102,36 @@ app.use( (req, res, next) => {
 
 //error handler catch all
 app.use((err, req, res, next) => {
-  res.status(err.status).json(err.message);
+  res.status(err.status).json({message: err.message});
 });
-
-
-
-
 
 //Check user token
 function checkAuthorization(req, res, next){
   const userToken = req.get('Authorization');
   if (!userToken || userToken.split(' ')[1] !== process.env.API_KEY){
-
-    res.status(401).json({
+    let error = {
       status: 401,
-      error: 'You do not have access to this server. GO AWAY, OR ELSE'
-    });
+      message: 'You do not have access to this server. GO AWAY, OR ELSE'
+    };
+    return next(error);
   }
   next();
+}
+
+//Check their actual request
+function checkQuery (req, res, next){
+  let error;
+
+  const options = ['genre', 'country', 'avg_vote'];
+  const chosenKeys = (Object.keys(req.query));
+
+  for (let key of chosenKeys){
+    if (!options.includes(key)){
+      error = {status: 400, message: `${key} is not a valid option`};
+      break; 
+    }
+  }
+  return error ? next(error) : next();
 }
 
 module.exports = app;
