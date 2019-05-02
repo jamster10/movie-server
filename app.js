@@ -21,14 +21,12 @@ const app = express();
 app.use(morgan('dev'));
 app.use(cors());
 app.use(helmet());
-app.use(checkAuthorization);
 
 //Handle authentication
-
+app.use(checkAuthorization);
 
 //Handle right parameters
-app.use(checkQuery)
-
+app.use(checkQuery);
 
 //main route
 app.get('/movie', (req, res, next)=>{
@@ -41,10 +39,6 @@ app.get('/movie', (req, res, next)=>{
     return next(err);
   }
 
-
-
-  
-  
   //filter by genre or throw error
   if (genre){
     if(!genres.includes(genre.toLowerCase())){
@@ -56,6 +50,7 @@ app.get('/movie', (req, res, next)=>{
       movie.genre.toLowerCase().includes(genre.toLowerCase())
     );
   }
+
   //filter by country or throw error
   if (country){
     if(!countries.includes(country)){
@@ -82,11 +77,11 @@ app.get('/movie', (req, res, next)=>{
     }
     results = results.length > 0 ? results.filter(movie => movie.avg_vote >= rating) : MOVIES.filter(movie => movie.avg_vote >= rating);
   }
+
   //reduce server output to be manageable
   if (results.length > 50) results.length = 50;
   results = [{count: results.length}, ...results];
   
-
   //send the final response
   return res.status(200).json(results);
 });
