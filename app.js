@@ -103,11 +103,11 @@ app.use((err, req, res, next) => {
 function checkAuthorization(req, res, next){
   const userToken = req.get('Authorization');
   if (!userToken || userToken.split(' ')[1] !== process.env.API_KEY){
-
-    res.status(401).json({
+    let error = {
       status: 401,
       error: 'You do not have access to this server. GO AWAY, OR ELSE'
-    });
+    };
+    return next(error);
   }
   next();
 }
