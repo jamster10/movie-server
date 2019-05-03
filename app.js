@@ -41,7 +41,7 @@ app.get('/movie', (req, res, next)=>{
 
   //filter by genre or throw error
   if (genre){
-    if(!genres.includes(genre.toLowerCase())){
+    if(genres.filter(item => item.includes(genre.toLowerCase())).length === 0){
       err.status = 400;
       err.message = 'Bad request: Genre does not existent';
       return next(err);
@@ -53,7 +53,7 @@ app.get('/movie', (req, res, next)=>{
 
   //filter by country or throw error
   if (country){
-    if(!countries.includes(country)){
+    if(!countries.filter(item => item.includes(country.toLowerCase()))){
       err.status = 400;
       err.message = 'Bad request: Check country spelling';
       return next(err);
